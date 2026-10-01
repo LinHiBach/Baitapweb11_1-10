@@ -1,4 +1,4 @@
-# BÀI TẬP LỚN: HỆ THỐNG QUẢN LÝ VIDEO & BÁN HÀNG TRỰC TUYẾN
+# BÀI TẬP : HỆ THỐNG QUẢN LÝ VIDEO & BÁN HÀNG TRỰC TUYẾN
 
 - **Họ và tên**: Lâm Huy Bách
 - **MSSV**: 24110165
