@@ -1,0 +1,22 @@
+# Maven build artifacts
+target/
+*.war
+*.jar
+
+# Eclipse settings
+.settings/
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.class
+
+# Logs
+*.log
+
+# OS generated
+.DS_Store
+Thumbs.db
+.agents/
+.maven-cache/

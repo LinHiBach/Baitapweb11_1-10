@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/WEB-INF/decorators">
+    <!-- Web User Decorator -->
+    <decorator name="web" page="web.jsp">
+        <pattern>/user/*</pattern>
+        <pattern>/home*</pattern>
+        <pattern>/video*</pattern>
+    </decorator>
+
+    <!-- Admin Decorator -->
+    <decorator name="admin" page="admin.jsp">
+        <pattern>/admin*</pattern>
+    </decorator>
+
+    <!-- Exclude Auth & Static Endpoints -->
+    <excludes>
+        <pattern>/login*</pattern>
+        <pattern>/register*</pattern>
+        <pattern>/verify-otp*</pattern>
+        <pattern>/waiting*</pattern>
+        <pattern>/logout*</pattern>
+        <pattern>/image*</pattern>
+    </excludes>
+</decorators>

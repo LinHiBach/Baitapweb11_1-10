@@ -46,6 +46,65 @@ Dưới đây là các tài khoản đã được thiết lập sẵn trong cơ 
 - **Trang xác nhận (`/views/web/order-success.jsp`)**:
   - Hiển thị mã đơn hàng `#ID`, thông tin người nhận, danh sách sản phẩm và tổng tiền thanh toán COD.
 
+### 3. Chức năng Lịch sử đặt hàng & Lọc theo trạng thái (`/orders`)
+- **Truy cập**: Bấm vào nút **"Lịch sử đơn"** trên thanh Menu Navbar (hoặc sau khi đặt hàng thành công tại `/order-success`).
+- **Lọc theo 8 trạng thái tiêu chuẩn**:
+  - Giao diện cung cấp thanh Tab chọn trạng thái trực quan với số lượng đếm thực tế `(Badge count)` cho từng trạng thái:
+    1. **Tất cả**: Xem toàn bộ đơn hàng của người dùng.
+    2. **Đơn hàng mới** (`Status = 0`): Đơn vừa đặt, đang chờ hệ thống tiếp nhận. Có nút **Hủy đơn hàng**.
+    3. **Đã xác nhận** (`Status = 1`): Đơn đã được cửa hàng xác nhận.
+    4. **Chuẩn bị hàng** (`Status = 2`): Đang đóng gói kiện hàng.
+    5. **Vận chuyển** (`Status = 3`): Kiện hàng đã giao cho bưu cục và đang luân chuyển.
+    6. **Giao hàng** (`Status = 4`): Shipper đang giao đến người nhận.
+    7. **Đã giao** (`Status = 5`): Giao hàng và thu hộ tiền mặt (COD) thành công.
+    8. **Đơn hàng hủy** (`Status = 6`): Đơn hàng đã bị hủy.
+    9. **Đơn hàng hoàn** (`Status = 7`): Đơn hàng hoàn trả về kho.
+- **Thanh tiến trình (Order Stepper Timeline)**: Hiển thị trực quan từng chặng tiến độ đơn hàng từ Đơn mới -> Đã giao.
+- **Dữ liệu chi tiết**: Hiển thị ảnh sản phẩm, tên, số lượng, giá, tổng tiền, thông tin người nhận, địa chỉ và ghi chú.
+
+---
+
+## 🧪 HƯỚNG DẪN KIỂM THỬ THAY ĐỔI TRẠNG THÁI TRONG DATABASE
+
+Theo yêu cầu: *(vào database để thay đổi các trạng thái để quan sát trạng thái đơn thay đổi theo trạng thái tương ứng)*:
+
+### 1. Bảng quy ước mã trạng thái trong CSDL (`dbo.Orders.Status`):
+| Mã Status (INT) | Trạng thái hiển thị | Ý nghĩa tiến trình |
+| :---: | :--- | :--- |
+| `0` | **Đơn hàng mới** | Vừa đặt xong (Mặc định khi checkout) |
+| `1` | **Đã xác nhận** | Cửa hàng duyệt đơn |
+| `2` | **Chuẩn bị hàng** | Đang đóng gói |
+| `3` | **Vận chuyển** | Xuất kho, luân chuyển bưu cục |
+| `4` | **Giao hàng** | Shipper đang đi phát hàng |
+| `5` | **Đã giao** | Khách đã nhận & trả tiền COD |
+| `6` | **Đơn hàng hủy** | Đơn bị hủy |
+| `7` | **Đơn hàng hoàn** | Đơn bị hoàn trả |
+
+### 2. Các câu lệnh SQL kiểm thử trong SQL Server Management Studio (SSMS):
+```sql
+USE WebVideoDB;
+GO
+
+-- Xem danh sách tất cả các đơn hàng hiện có:
+SELECT OrderId, Username, FullName, TotalPrice, Status, CreatedAt FROM dbo.Orders ORDER BY OrderId;
+
+-- Ví dụ: Đổi trạng thái của đơn hàng #1 để quan sát trên web (/orders):
+UPDATE dbo.Orders SET Status = 0 WHERE OrderId = 1; -- 0: Đơn hàng mới
+UPDATE dbo.Orders SET Status = 1 WHERE OrderId = 1; -- 1: Đã xác nhận
+UPDATE dbo.Orders SET Status = 2 WHERE OrderId = 1; -- 2: Chuẩn bị hàng
+UPDATE dbo.Orders SET Status = 3 WHERE OrderId = 1; -- 3: Vận chuyển
+UPDATE dbo.Orders SET Status = 4 WHERE OrderId = 1; -- 4: Giao hàng
+UPDATE dbo.Orders SET Status = 5 WHERE OrderId = 1; -- 5: Đã giao
+UPDATE dbo.Orders SET Status = 6 WHERE OrderId = 1; -- 6: Đơn hàng hủy
+UPDATE dbo.Orders SET Status = 7 WHERE OrderId = 1; -- 7: Đơn hàng hoàn
+```
+> 💡 *Sau khi chạy lệnh `UPDATE` trong SSMS, tải lại trang `http://localhost:8080/DEMO/orders` hoặc bấm qua các Tab lọc tương ứng để quan sát đơn hàng tự động nhảy vào đúng nhóm trạng thái!*
+
+### 3. Quản lý trạng thái từ Trang Quản Trị Admin (`/admin/orders`):
+- Đăng nhập tài khoản `admin` / `123`.
+- Vào menu **Quản lý Đơn hàng** (`/admin/orders`).
+- Lọc theo từng trạng thái và có thể chọn trạng thái mới trong dropdown rồi bấm **Lưu** trực tiếp trên website.
+
 ---
 
 ## 🛠️ HƯỚNG DẪN CÀI ĐẶT & CHẠY DỰ ÁN
@@ -53,6 +112,7 @@ Dưới đây là các tài khoản đã được thiết lập sẵn trong cơ 
 ### 1. Cơ sở dữ liệu (SQL Server)
 - Mở **SQL Server Management Studio (SSMS)**.
 - Mở và thực thi toàn bộ file script: [`24110165_de3.sql`](./24110165_de3.sql).
+- File script đã tạo sẵn dữ liệu mẫu cho cả 8 trạng thái đơn hàng để kiểm thử ngay lập tức.
 - Kiểm tra cấu hình kết nối trong file: `src/main/resources/META-INF/persistence.xml` (Port: `1433`, User: `sa`, Database: `WebVideoDB`).
 
 ### 2. Triển khai Server (Tomcat)
@@ -60,3 +120,4 @@ Dưới đây là các tài khoản đã được thiết lập sẵn trong cơ 
 - Chuột phải vào project chọn **Maven** -> **Update Project...**
 - Thêm project vào máy chủ **Apache Tomcat 10.1+** (hỗ trợ Jakarta EE 10 / Servlet 6.0).
 - Khởi động máy chủ và truy cập: `http://localhost:8080/DEMO/home` hoặc `http://localhost:8080/DEMO/login`.
+
